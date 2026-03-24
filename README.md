@@ -28,6 +28,34 @@ export EVALBOT_TOKEN="your_token"  # Evalbot 授权 Token
 
 访问 [Evalbot 官网](https://evalbot.bytedance.com/) 注册账号即可获取授权 Token。
 
+## 配置方式
+
+### 方法1：使用 .env 文件（推荐）
+
+1. 创建 .env 文件：
+```bash
+echo "EVALBOT_TOKEN=your_token_here" > .env
+```
+
+2. 设置文件权限（推荐）：
+```bash
+chmod 600 .env
+```
+
+3. 直接运行即可自动加载 token
+
+### 方法2：设置环境变量
+
+```bash
+export EVALBOT_TOKEN="your_token_here"
+```
+
+### 方法3：命令行参数传递
+
+```bash
+python3 evalbot_skill.py --token "your_token_here" data-generation --generate-type hot_topic
+```
+
 ### 命令行使用
 
 **数据生成:**
