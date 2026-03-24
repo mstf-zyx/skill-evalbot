@@ -16,6 +16,13 @@ from enum import Enum
 
 import requests
 
+try:
+    from dotenv import load_dotenv
+    # 尝试加载.env文件
+    load_dotenv()
+except ImportError:
+    pass
+
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger(__name__)
 
