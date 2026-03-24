@@ -24,38 +24,6 @@ pip install -r requirements.txt
 export EVALBOT_TOKEN="your_token"  # Evalbot 授权 Token
 ```
 
-## Token 获取方式
-
-访问 [Evalbot 官网](https://evalbot.bytedance.com/) 注册账号即可获取授权 Token。
-
-## 配置方式
-
-### 方法1：使用 .env 文件（推荐）
-
-1. 创建 .env 文件：
-```bash
-echo "EVALBOT_TOKEN=your_token_here" > .env
-```
-
-2. 设置文件权限（推荐）：
-```bash
-chmod 600 .env
-```
-
-3. 直接运行即可自动加载 token
-
-### 方法2：设置环境变量
-
-```bash
-export EVALBOT_TOKEN="your_token_here"
-```
-
-### 方法3：命令行参数传递
-
-```bash
-python3 evalbot_skill.py --token "your_token_here" data-generation --generate-type hot_topic
-```
-
 ### 命令行使用
 
 **数据生成:**
@@ -75,13 +43,69 @@ python evalbot_skill.py model-evaluation \
 python evalbot_skill.py --token "your_token" data-generation --top-n 5
 ```
 
-## 支持的评估类型
+## 支持的评估类型及参数要求
 
-- `knowledge-instruction_following`: 指令遵循评估
-- `knowledge-scalable-comprehensive_key_points`: 综合要点评估
-- `knowledge-authentic_and_accurate-general`: 真实准确性评估
-- `knowledge-richness`: 丰富度评估
-- `knowledge-gsb-compare`: GSB 对比评估
+### 1. 指令遵循评估 (knowledge-instruction_following)
+**描述**：评估模型是否正确遵循用户指令
+**参数要求**：
+- `location`: 用户地理位置，例如"深圳南山"
+- `scene`: 场景类型，例如"知识问答 - 本地生活"
+- `question`: 用户问题
+- `reply`: 模型回复
+
+**示例**：
+```bash
+python evalbot_skill.py model-evaluation --evaluate-type "knowledge-instruction_following" --params '{"location": "深圳南山", "scene": "知识问答 - 本地生活", "question": "优衣库199元的牛仔裤为什么被消费者觉得价格偏高？", "reply": "优衣库199元牛仔裤价格偏高主要是因为品牌定位和市场竞争两方面原因。"}'
+```
+
+### 2. 可扩展-要点完整评估 (knowledge-scalable-comprehensive_key_points)
+**描述**：评估模型回复的要点完整性
+**参数要求**：
+- `scene`: 场景类型，例如"知识问答 - 本地生活"
+- `question`: 用户问题
+- `reply`: 模型回复
+
+**示例**：
+```bash
+python evalbot_skill.py model-evaluation --evaluate-type "knowledge-scalable-comprehensive_key_points" --params '{"scene": "知识问答 - 本地生活", "question": "优衣库199元的牛仔裤为什么被消费者觉得价格偏高？", "reply": "优衣库199元牛仔裤价格偏高主要是因为品牌定位和市场竞争两方面原因。"}'
+```
+
+### 3. 真实准确性评估 (knowledge-authentic_and_accurate-general)
+**描述**：评估模型回复内容的真实性和准确性
+**参数要求**：
+- `base_time`: 基准时间，例如"2025-09-16"
+- `question`: 用户问题
+- `reply`: 模型回复
+
+**示例**：
+```bash
+python evalbot_skill.py model-evaluation --evaluate-type "knowledge-authentic_and_accurate-general" --params '{"base_time": "2025-09-16", "question": "优衣库199元的牛仔裤为什么被消费者觉得价格偏高？", "reply": "优衣库199元牛仔裤价格偏高主要是因为品牌定位和市场竞争两方面原因。"}'
+```
+
+### 4. 丰富度评估 (knowledge-richness)
+**描述**：评估模型回复内容的丰富度和详细程度
+**参数要求**：
+- `query`: 用户问题
+- `reply`: 模型回复
+
+**示例**：
+```bash
+python evalbot_skill.py model-evaluation --evaluate-type "knowledge-richness" --params '{"query": "优衣库199元的牛仔裤为什么被消费者觉得价格偏高？", "reply": "优衣库199元牛仔裤价格偏高主要是因为品牌定位和市场竞争两方面原因。"}'
+```
+
+### 5. GSB对比评估 (knowledge-gsb-compare)
+**描述**：对比两个模型回复的优劣
+**参数要求**：
+- `query`: 用户问题
+- `domain`: 问题领域，例如"消费"或"科技"
+- `reply_a`: 模型A的回复
+- `reply_b`: 模型B的回复
+- `evaluation_criteria`: 评估标准，例如"准确性, 全面性, 深度"
+
+**示例**：
+```bash
+python evalbot_skill.py model-evaluation --evaluate-type "knowledge-gsb-compare" --params '{"query": "优衣库199元的牛仔裤为什么被消费者觉得价格偏高？", "domain": "消费", "reply_a": "优衣库199元牛仔裤价格偏高主要是因为品牌定位原因", "reply_b": "优衣库199元牛仔裤价格偏高主要是因为品牌定位和市场竞争两方面原因", "evaluation_criteria": "准确性, 全面性"}'
+```
 
 ## 代码中使用
 

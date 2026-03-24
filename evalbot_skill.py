@@ -27,6 +27,35 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(me
 logger = logging.getLogger(__name__)
 
 
+def validate_params(evaluate_type: str, params: Dict[str, str]) -> None:
+    """
+    验证评估参数是否符合要求
+    
+    Args:
+        evaluate_type: 评估类型
+        params: 评估参数
+    
+    Raises:
+        ValueError: 参数不符合要求时
+    """
+    required_params = {
+        "knowledge-instruction_following": {"location", "scene", "question", "reply"},
+        "knowledge-scalable-comprehensive_key_points": {"scene", "question", "reply"},
+        "knowledge-authentic_and_accurate-general": {"base_time", "question", "reply"},
+        "knowledge-richness": {"query", "reply"},
+        "knowledge-gsb-compare": {"query", "domain", "reply_a", "reply_b", "evaluation_criteria"},
+    }
+    
+    if evaluate_type not in required_params:
+        return
+    
+    missing_params = required_params[evaluate_type] - set(params.keys())
+    if missing_params:
+        raise ValueError(
+            f"{evaluate_type} 评估需要以下参数: {', '.join(missing_params)}"
+        )
+
+
 # ==================== 数据模型 ====================
 
 class EvaluateIDType(str, Enum):
@@ -234,11 +263,23 @@ class EvalbotSkill:
 
         Args:
             evaluate_type: 评估类型
+                - knowledge-instruction_following: 指令遵循评估（需要 location, scene, question, reply 参数）
+                - knowledge-scalable-comprehensive_key_points: 可扩展-要点完整评估（需要 scene, question, reply 参数）
+                - knowledge-authentic_and_accurate-general: 真实准确性评估（需要 base_time, question, reply 参数）
+                - knowledge-richness: 丰富度评估（需要 query, reply 参数）
+                - knowledge-gsb-compare: GSB对比评估（需要 query, domain, reply_a, reply_b, evaluation_criteria 参数）
             params: 评估参数字典
 
         Returns:
             评估结果字典
         """
+        # 验证参数
+        try:
+            validate_params(evaluate_type, params)
+        except ValueError as e:
+            logger.error(f"参数验证失败: {e}")
+            return None
+        
         # 1. 获取能力 ID
         ids = self.client.get_evaluate_ids(EvaluateIDType.ABILITY, evaluate_type)
         if not ids:
