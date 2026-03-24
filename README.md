@@ -24,6 +24,10 @@ pip install -r requirements.txt
 export EVALBOT_TOKEN="your_token"  # Evalbot 授权 Token
 ```
 
+## Token 获取方式
+
+访问 [Evalbot 官网](https://evalbot.bytedance.com/) 注册账号即可获取授权 Token。
+
 ### 命令行使用
 
 **数据生成:**
