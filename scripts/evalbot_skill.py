@@ -39,9 +39,9 @@ def validate_params(evaluate_type: str, params: Dict[str, str]) -> None:
         ValueError: 参数不符合要求时
     """
     required_params = {
-        "knowledge-instruction_following": {"location", "scene", "question", "reply"},
-        "knowledge-scalable-comprehensive_key_points": {"scene", "question", "reply"},
-        "knowledge-authentic_and_accurate-general": {"base_time", "question", "reply"},
+        "knowledge-instruction_following": {"location", "scene", "query", "reply"},
+        "knowledge-scalable-comprehensive_key_points": {"scene", "query", "reply"},
+        "knowledge-authentic_and_accurate-general": {"base_time", "query", "reply"},
         "knowledge-richness": {"query", "reply"},
         "knowledge-gsb-compare": {"query", "domain", "reply_a", "reply_b", "evaluation_criteria"},
     }
@@ -263,9 +263,9 @@ class EvalbotSkill:
 
         Args:
             evaluate_type: 评估类型
-                - knowledge-instruction_following: 指令遵循评估（需要 location, scene, question, reply 参数）
-                - knowledge-scalable-comprehensive_key_points: 可扩展-要点完整评估（需要 scene, question, reply 参数）
-                - knowledge-authentic_and_accurate-general: 真实准确性评估（需要 base_time, question, reply 参数）
+                - knowledge-instruction_following: 指令遵循评估（需要 location, scene, query, reply 参数）
+                - knowledge-scalable-comprehensive_key_points: 可扩展-要点完整评估（需要 scene, query, reply 参数）
+                - knowledge-authentic_and_accurate-general: 真实准确性评估（需要 base_time, query, reply 参数）
                 - knowledge-richness: 丰富度评估（需要 query, reply 参数）
                 - knowledge-gsb-compare: GSB对比评估（需要 query, domain, reply_a, reply_b, evaluation_criteria 参数）
             params: 评估参数字典

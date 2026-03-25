@@ -57,9 +57,9 @@ python scripts/evalbot_skill.py model-evaluation \
 
 | 评估类型 | 所需参数 | 说明 |
 |----------|----------|------|
-| knowledge-instruction_following | location, scene, question, reply | 指令遵循评估（需要地点、场景、用户问题和模型回复参数） |
-| knowledge-scalable-comprehensive_key_points | scene, question, reply | 综合要点评估（需要场景、用户问题和模型回复参数） |
-| knowledge-authentic_and_accurate-general | base_time, question, reply | 真实准确性评估（需要基准时间、用户问题和模型回复参数） |
+| knowledge-instruction_following | location, scene, query, reply | 指令遵循评估（需要地点、场景、用户查询和模型回复参数） |
+| knowledge-scalable-comprehensive_key_points | scene, query, reply | 综合要点评估（需要场景、用户查询和模型回复参数） |
+| knowledge-authentic_and_accurate-general | base_time, query, reply | 真实准确性评估（需要基准时间、用户查询和模型回复参数） |
 | knowledge-richness | query, reply | 丰富度评估（需要用户查询和模型回复参数） |
 | knowledge-gsb-compare | query, domain, reply_a, reply_b, evaluation_criteria | GSB对比评估（需要用户查询、领域、两个模型回复和评估标准参数） |
 
@@ -70,7 +70,7 @@ python scripts/evalbot_skill.py model-evaluation \
 {
   "location": "上海",
   "scene": "聊天",
-  "question": "请用3句话介绍人工智能",
+  "query": "请用3句话介绍人工智能",
   "reply": "人工智能是一种模拟人类智能的技术，它可以学习、推理和解决问题。人工智能在各个领域都有应用，比如医疗、金融和教育。随着技术的发展，人工智能将会越来越普及。"
 }
 

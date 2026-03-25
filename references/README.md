@@ -55,7 +55,7 @@ python scripts/evalbot_skill.py --token "your_token" data-generation --top-n 5
 
 **示例**：
 ```bash
-python scripts/evalbot_skill.py model-evaluation --evaluate-type "knowledge-instruction_following" --params '{"location": "深圳南山", "scene": "知识问答 - 本地生活", "question": "优衣库199元的牛仔裤为什么被消费者觉得价格偏高？", "reply": "优衣库199元牛仔裤价格偏高主要是因为品牌定位和市场竞争两方面原因。"}'
+python scripts/evalbot_skill.py model-evaluation --evaluate-type "knowledge-instruction_following" --params '{"location": "深圳南山", "scene": "知识问答 - 本地生活", "query": "优衣库199元的牛仔裤为什么被消费者觉得价格偏高？", "reply": "优衣库199元牛仔裤价格偏高主要是因为品牌定位和市场竞争两方面原因。"}'
 ```
 
 ### 2. 可扩展-要点完整评估 (knowledge-scalable-comprehensive_key_points)
@@ -67,7 +67,7 @@ python scripts/evalbot_skill.py model-evaluation --evaluate-type "knowledge-inst
 
 **示例**：
 ```bash
-python scripts/evalbot_skill.py model-evaluation --evaluate-type "knowledge-scalable-comprehensive_key_points" --params '{"scene": "知识问答 - 本地生活", "question": "优衣库199元的牛仔裤为什么被消费者觉得价格偏高？", "reply": "优衣库199元牛仔裤价格偏高主要是因为品牌定位和市场竞争两方面原因。"}'
+python scripts/evalbot_skill.py model-evaluation --evaluate-type "knowledge-scalable-comprehensive_key_points" --params '{"scene": "知识问答 - 本地生活", "query": "优衣库199元的牛仔裤为什么被消费者觉得价格偏高？", "reply": "优衣库199元牛仔裤价格偏高主要是因为品牌定位和市场竞争两方面原因。"}'
 ```
 
 ### 3. 真实准确性评估 (knowledge-authentic_and_accurate-general)
@@ -79,7 +79,7 @@ python scripts/evalbot_skill.py model-evaluation --evaluate-type "knowledge-scal
 
 **示例**：
 ```bash
-python scripts/evalbot_skill.py model-evaluation --evaluate-type "knowledge-authentic_and_accurate-general" --params '{"base_time": "2025-09-16", "question": "优衣库199元的牛仔裤为什么被消费者觉得价格偏高？", "reply": "优衣库199元牛仔裤价格偏高主要是因为品牌定位和市场竞争两方面原因。"}'
+python scripts/evalbot_skill.py model-evaluation --evaluate-type "knowledge-authentic_and_accurate-general" --params '{"base_time": "2025-09-16", "query": "优衣库199元的牛仔裤为什么被消费者觉得价格偏高？", "reply": "优衣库199元牛仔裤价格偏高主要是因为品牌定位和市场竞争两方面原因。"}'
 ```
 
 ### 4. 丰富度评估 (knowledge-richness)
