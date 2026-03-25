@@ -22,43 +22,23 @@ compatibility: "需要Python 3.8+ 和 Evalbot API访问权限，支持所有Agen
 ### 环境准备
 1. 确保已安装 Python 3.8+
 2. 安装依赖：`pip install -r requirements.txt`
-3. 配置环境变量（可选）：
+3. 配置环境变量：
    ```bash
-   export EVALBOT_TOKEN="your-evalbot-token"
+   cp .env.example .env
+   # 编辑.env文件，填入你的Evalbot Token
    ```
 
 ### 数据生成
 ```bash
-python scripts/evalbot_skill.py data-generation --generate_type hot_topic --top_n 5
+python scripts/evalbot_skill.py data-generation --generate-type hot_topic --top-n 5
 ```
 
 ### 模型评估
 ```bash
 python scripts/evalbot_skill.py model-evaluation \
-  --evaluate_type knowledge-instruction_following \
+  --evaluate-type knowledge-instruction_following \
   --params '{"query": "你的问题", "response": "模型回复"}'
 ```
 
-## 命令详情
-
-### data-generation
-生成数据（如热点话题）
-
-| 参数名 | 类型 | 默认值 | 说明 |
-|--------|------|--------|------|
-| generate_type | string | hot_topic | 生成数据类型，目前仅支持 hot_topic |
-| top_n | integer | 5 | 获取前 N 个热点话题 |
-
-### model-evaluation
-评估模型回复质量
-
-| 参数名 | 类型 | 必需 | 说明 |
-|--------|------|------|------|
-| evaluate_type | string | 是 | 评估类型，支持：<br>- knowledge-instruction_following: 指令遵循评估<br>- knowledge-scalable-comprehensive_key_points: 综合要点评估<br>- knowledge-authentic_and_accurate-general: 真实准确性评估<br>- knowledge-richness: 丰富度评估<br>- knowledge-gsb-compare: GSB 对比评估 |
-| params | string | 是 | 评估参数（JSON 格式字符串） |
-
 ## 详细文档
-请参考 `references/README.md` 获取完整说明和 API 文档。
-
-## 版本历史
-- v1.0.0: 初始版本，支持数据生成和模型评估功能
+请参考 `references/README.md` 获取完整说明。
