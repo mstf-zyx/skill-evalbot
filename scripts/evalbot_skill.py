@@ -26,6 +26,8 @@ except ImportError:
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger(__name__)
 
+TRIGGER_SOURCE = "public_skill"
+
 
 def validate_params(evaluate_type: str, params: Dict[str, str]) -> None:
     """
@@ -149,7 +151,8 @@ class EvalbotClient:
             "params": params,
             "query": "",
             "eval_str": "",
-            "creator": ""
+            "creator": "",
+            "trigger_source": TRIGGER_SOURCE
         }
 
         try:
@@ -179,7 +182,8 @@ class EvalbotClient:
         payload = {
             "id": plugin_id,
             "params": params,
-            "quantity": quantity
+            "quantity": quantity,
+            "trigger_source": TRIGGER_SOURCE
         }
 
         try:
