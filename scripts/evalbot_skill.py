@@ -12,7 +12,6 @@ import argparse
 import logging
 from typing import Optional, Dict, Any, List
 from dataclasses import dataclass
-from enum import Enum
 
 import requests
 
@@ -59,10 +58,6 @@ def validate_params(evaluate_type: str, params: Dict[str, str]) -> None:
 
 
 # ==================== 数据模型 ====================
-
-class EvaluateIDType(str, Enum):
-    PLUGIN = "plugin"
-    ABILITY = "ability"
 
 
 @dataclass
@@ -114,40 +109,14 @@ class EvalbotClient:
             headers["Authorization"] = f"Bearer {self.token}"
         return headers
 
-    def get_evaluate_ids(self, id_type: EvaluateIDType, id_key: str) -> Optional[List[int]]:
-        """
-        获取评估 ID
-        GET /evaluate/get_ids?id_type={type}&id_key={key}
-        """
-        url = f"{self.BASE_URL}/evaluate/get_ids"
-        params = {"id_type": id_type.value, "id_key": id_key}
-
-        try:
-            self._logger.info(f"Getting evaluate IDs: type={id_type.value}, key={id_key}")
-            resp = requests.get(url, params=params, headers=self._get_headers())
-            resp.raise_for_status()
-            data = resp.json()
-
-            base = data.get("base", {})
-            self._logger.info(f"Get IDs response: ret={base.get('ret')}, msg={base.get('error_msg')}, log_id={base.get('log_id')}")
-
-            if base.get("ret") != 0:
-                self._logger.error(f"Failed to get IDs: {base.get('error_msg')}")
-                return None
-
-            return data.get("data", [])
-        except Exception as e:
-            self._logger.error(f"Exception in get_evaluate_ids: {e}")
-            return None
-
-    def ability_trigger(self, evaluate_id: int, params: str) -> Optional[AbilityTriggerRespData]:
+    def ability_trigger(self, evaluate_type: str, params: str) -> Optional[AbilityTriggerRespData]:
         """
         能力评估触发（流式响应）
         POST /evaluate/ability/trigger
         """
         url = f"{self.BASE_URL}/evaluate/ability/trigger"
         payload = {
-            "id": evaluate_id,
+            "evaluate_type": evaluate_type,
             "params": params,
             "query": "",
             "eval_str": "",
@@ -156,7 +125,7 @@ class EvalbotClient:
         }
 
         try:
-            self._logger.info(f"Triggering ability evaluation: id={evaluate_id}")
+            self._logger.info(f"Triggering ability evaluation: type={evaluate_type}")
             with requests.post(url, json=payload, headers=self._get_headers(), stream=True) as resp:
                 resp.raise_for_status()
 
@@ -173,21 +142,21 @@ class EvalbotClient:
             self._logger.error(f"Exception in ability_trigger: {e}")
             return None
 
-    def plugin_trigger(self, plugin_id: int, params: Dict[str, str], quantity: int) -> Optional[List[PluginTriggerData]]:
+    def plugin_trigger(self, generate_type: str, params: Dict[str, str], quantity: int) -> Optional[List[PluginTriggerData]]:
         """
         插件触发（流式响应）
         POST /evaluate/plugin/trigger
         """
         url = f"{self.BASE_URL}/evaluate/plugin/trigger"
         payload = {
-            "id": plugin_id,
+            "generate_type": generate_type,
             "params": params,
             "quantity": quantity,
             "trigger_source": TRIGGER_SOURCE
         }
 
         try:
-            self._logger.info(f"Triggering plugin: id={plugin_id}, quantity={quantity}")
+            self._logger.info(f"Triggering plugin: type={generate_type}, quantity={quantity}")
             results = []
             with requests.post(url, json=payload, headers=self._get_headers(), stream=True) as resp:
                 resp.raise_for_status()
@@ -233,27 +202,19 @@ class EvalbotSkill:
         Returns:
             生成的数据列表
         """
-        # 1. 获取插件 ID
-        ids = self.client.get_evaluate_ids(EvaluateIDType.PLUGIN, generate_type)
-        if not ids:
-            logger.error(f"Failed to get plugin ID for type: {generate_type}")
-            return []
-
-        plugin_id = ids[0]
-
-        # 2. 转换参数格式
+        # 1. 转换参数格式
         resolve_params = {}
         for k, v in {"top_n": str(top_n)}.items():
             new_k = k if k.startswith("{{") and k.endswith("}}") else f"{{{{{k}}}}}"
             resolve_params[new_k] = v
 
-        # 3. 调用插件触发
+        # 2. 调用插件触发
         quantity = min(10, top_n)
-        results = self.client.plugin_trigger(plugin_id, resolve_params, quantity)
+        results = self.client.plugin_trigger(generate_type, resolve_params, quantity)
         if not results:
             return []
 
-        # 4. 提取 message 事件的数据
+        # 3. 提取 message 事件的数据
         messages = []
         for item in results:
             if item.event == "message" and item.data:
@@ -283,27 +244,19 @@ class EvalbotSkill:
         except ValueError as e:
             logger.error(f"参数验证失败: {e}")
             return None
-        
-        # 1. 获取能力 ID
-        ids = self.client.get_evaluate_ids(EvaluateIDType.ABILITY, evaluate_type)
-        if not ids:
-            logger.error(f"Failed to get ability ID for type: {evaluate_type}")
-            return None
 
-        ability_id = ids[0]
-
-        # 2. 转换参数格式
+        # 1. 转换参数格式
         resolve_params = {}
         for k, v in params.items():
             new_k = k if k.startswith("{{") and k.endswith("}}") else f"{{{{{k}}}}}"
             resolve_params[new_k] = v
 
-        # 3. 调用能力评估
-        result = self.client.ability_trigger(ability_id, json.dumps(resolve_params, ensure_ascii=False))
+        # 2. 调用能力评估
+        result = self.client.ability_trigger(evaluate_type, json.dumps(resolve_params, ensure_ascii=False))
         if not result:
             return None
 
-        # 4. 转换为字典返回
+        # 3. 转换为字典返回
         return {
             "is_available": result.is_available,
             "is_expected": result.is_expected,

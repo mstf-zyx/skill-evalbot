@@ -4,11 +4,10 @@
 
 ## 底层 API
 
-该 Skill 直接调用 Evalbot 的三个 HTTP 接口：
+该 Skill 直接调用 Evalbot 的两个 HTTP 接口（trigger 接口已优化为直接通过类型字符串触发，无需先获取 ID）：
 
-1. **GET** `/evaluate/get_ids?id_type={type}&id_key={key}` - 获取评估 ID
-2. **POST** `/evaluate/ability/trigger` - 能力评估触发（流式响应）
-3. **POST** `/evaluate/plugin/trigger` - 插件触发（流式响应）
+1. **POST** `/evaluate/ability/trigger` - 能力评估触发（流式响应）
+2. **POST** `/evaluate/plugin/trigger` - 插件触发（流式响应）
 
 ## 安装依赖
 
@@ -50,7 +49,7 @@ python scripts/evalbot_skill.py --token "your_token" data-generation --top-n 5
 **参数要求**：
 - `location`: 用户地理位置，例如"深圳南山"
 - `scene`: 场景类型，例如"知识问答 - 本地生活"
-- `question`: 用户问题
+- `query`: 用户问题
 - `reply`: 模型回复
 
 **示例**：
@@ -62,7 +61,7 @@ python scripts/evalbot_skill.py model-evaluation --evaluate-type "knowledge-inst
 **描述**：评估模型回复的要点完整性
 **参数要求**：
 - `scene`: 场景类型，例如"知识问答 - 本地生活"
-- `question`: 用户问题
+- `query`: 用户问题
 - `reply`: 模型回复
 
 **示例**：
@@ -74,7 +73,7 @@ python scripts/evalbot_skill.py model-evaluation --evaluate-type "knowledge-scal
 **描述**：评估模型回复内容的真实性和准确性
 **参数要求**：
 - `base_time`: 基准时间，例如"2025-09-16"
-- `question`: 用户问题
+- `query`: 用户问题
 - `reply`: 模型回复
 
 **示例**：
