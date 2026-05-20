@@ -1,6 +1,6 @@
 ---
 name: evalbot
-description: 直接调用 Evalbot HTTP API，支持数据生成和模型评估
+description: 通过 Evalbot API 评测大模型回复质量并生成评测用数据。当用户需要对模型回复做指令遵循 / 要点完整 / 真实准确 / 丰富度 / GSB 对比等评估，或需要拉取热点话题作为评测输入时使用。
 license: MIT
 metadata:
   author: bytedance-evalbot
@@ -37,7 +37,7 @@ python scripts/evalbot_skill.py data-generation --generate-type hot_topic --top-
 ```bash
 python scripts/evalbot_skill.py model-evaluation \
   --evaluate-type knowledge-instruction_following \
-  --params '{"query": "你的问题", "response": "模型回复"}'
+  --params '{"location": "上海", "scene": "聊天", "query": "你的问题", "reply": "模型回复"}'
 ```
 
 ## 命令详情
