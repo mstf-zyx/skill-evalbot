@@ -4,7 +4,7 @@ description: 通过 Evalbot API 评测大模型回复质量并生成评测用数
 license: MIT
 metadata:
   author: bytedance-evalbot
-  version: "1.0.0"
+  version: "1.2.1"
   homepage: "https://evalbot.bytedance.com"
   tags: ["data-generation", "model-evaluation", "evalbot"]
 compatibility: "需要Python 3.8+ 和 Evalbot API访问权限，支持所有AgentSkills兼容平台"
@@ -53,36 +53,46 @@ python scripts/evalbot_skill.py model-evaluation \
 ### model-evaluation
 评估模型回复质量
 
-#### 评估类型与所需参数
+#### 评估类型一览
 
-| 评估类型 | 所需参数 | 说明 |
-|----------|----------|------|
-| knowledge-instruction_following | location, scene, query, reply | 指令遵循评估（需要地点、场景、用户查询和模型回复参数） |
-| knowledge-scalable-comprehensive_key_points | scene, query, reply | 综合要点评估（需要场景、用户查询和模型回复参数） |
-| knowledge-authentic_and_accurate-general | base_time, query, reply | 真实准确性评估（需要基准时间、用户查询和模型回复参数） |
-| knowledge-richness | query, reply | 丰富度评估（需要用户查询和模型回复参数） |
-| knowledge-gsb-compare | query, domain, reply_a, reply_b, evaluation_criteria | GSB对比评估（需要用户查询、领域、两个模型回复和评估标准参数） |
+> 各指标的所需参数与示例请见 `references/README.md`，或运行 `python scripts/evalbot_skill.py list-types` 获取最新机器可读列表（含必填字段与默认值）。
 
-#### 示例参数
+##### 文本类（text-*）
+| 评估类型 | 说明 |
+|----------|------|
+| text-prompt_follow | Prompt 遵循评估（含 system prompt 的指令遵循评估） |
+| text-expression | 文本表达评估（语言流畅度、表达自然度） |
+| text-structure | 文本结构评估（段落组织、层次清晰度） |
+| text-repeatability | 文本重复度评估（需提供 check_points 检查点） |
+| text-redundancy | 文本冗余度评估（识别无效或重复信息） |
+| text-logicality | 文本逻辑性评估（推理过程合理性） |
+| text-gsb | 文本 GSB 对比评估（无需 domain，相比 knowledge-gsb-compare 更通用） |
 
-```json
-# 指令遵循评估示例参数
-{
-  "location": "上海",
-  "scene": "聊天",
-  "query": "请用3句话介绍人工智能",
-  "reply": "人工智能是一种模拟人类智能的技术，它可以学习、推理和解决问题。人工智能在各个领域都有应用，比如医疗、金融和教育。随着技术的发展，人工智能将会越来越普及。"
-}
+##### 知识类（knowledge-*）
+| 评估类型 | 说明 |
+|----------|------|
+| knowledge-instruction_following | 指令遵循评估（基于地点与场景） |
+| knowledge-scalable-comprehensive_key_points | 可扩展-要点完整评估 |
+| knowledge-authentic_and_accurate-general | 真实准确性评估（基于基准时间） |
+| knowledge-richness | 丰富度评估 |
+| knowledge-gsb-compare | GSB 对比评估（含 domain 与评估标准） |
+| knowledge-satisfaction_of_needs | 需求满足度评估 |
 
-# GSB对比评估示例参数
-{
-  "query": "请解释什么是机器学习",
-  "domain": "人工智能",
-  "reply_a": "机器学习是人工智能的一个分支，它使计算机能够从数据中学习模式并做出预测。",
-  "reply_b": "机器学习是人工智能的一个子集，它涉及算法的开发，这些算法可以从数据中学习模式，进行预测或决策，而无需明确编程。",
-  "evaluation_criteria": "评估回复的准确性、完整性和清晰度。"
-}
-```
+##### 图像类（image-*）
+| 评估类型 | 说明 |
+|----------|------|
+| image-general_evaluation | 图像通用评估（按自定义评估准则与评分准则打分） |
+| image-realism | 图像真实性评估（评估图像是否符合现实物理规律） |
+| image-aesthetic | 图像美学评估（评估构图、色彩等美学维度） |
+
+##### 多模态生成类（t2i / t2v / v2v / i2v）
+| 评估类型 | 说明 |
+|----------|------|
+| t2i-instruction_following | 文生图指令遵循评估 |
+| t2i-consistency | 文生图一致性评估（编辑前后图像一致性） |
+| t2v-instruction_following | 文生视频指令遵循评估 |
+| v2v-instruction_following | 视频生视频指令遵循评估 |
+| i2v-instruction_following | 图生视频指令遵循评估 |
 
 ## 详细文档
-请参考 `references/README.md` 获取完整说明。
+请参考 `references/README.md` 获取完整说明（含每个指标的所需参数与可运行示例）。
