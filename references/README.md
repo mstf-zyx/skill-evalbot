@@ -4,7 +4,7 @@
 
 ## 底层 API
 
-该 Skill 直接调用 Evalbot 的两个 HTTP 接口（trigger 接口已优化为直接通过类型字符串触发，无需先获取 ID）：
+该 Skill 直接调用 Evalbot 的两个 HTTP 接口：
 
 1. **POST** `/evaluate/ability/trigger` - 能力评估触发（流式响应）
 2. **POST** `/evaluate/plugin/trigger` - 插件触发（流式响应）
@@ -45,7 +45,6 @@ python scripts/evalbot_skill.py --token "your_token" data-generation --top-n 5
 ## 支持的评估类型及参数要求
 
 > 评估类型按业务领域分组，命名规则为 `{领域}-{指标}`。
-> 部分指标在后端使用历史 workflow_name，对外名通过 alias 透明映射，无需关心底层名。
 
 ### 一、知识类（knowledge-*）
 
@@ -238,23 +237,9 @@ python scripts/evalbot_skill.py model-evaluation --evaluate-type "image-realism"
 python scripts/evalbot_skill.py model-evaluation --evaluate-type "image-aesthetic" --params '{"image_url_list": ["https://example.com/img.png"]}'
 ```
 
-### 四、图文混合类（image_text-*）
+### 四、多模态生成类（t2i / t2v / v2v / i2v）
 
-#### 17. 图文逻辑性评估 (image_text-logicality)
-**描述**：基于一组图像评估模型对图像内容的推理与描述逻辑
-**参数要求**：
-- `query`: 用户问题
-- `reply`: 模型回复
-- `image_url_list`: 图像 URL 列表（按时间或顺序排列）
-
-**示例**：
-```bash
-python scripts/evalbot_skill.py model-evaluation --evaluate-type "image_text-logicality" --params '{"query": "按先后顺序描述画面变化", "reply": "...", "image_url_list": ["https://example.com/1.png", "https://example.com/2.png"]}'
-```
-
-### 五、多模态生成类（t2i / t2v / v2v / i2v）
-
-#### 18. 文生图指令遵循评估 (t2i-instruction_following)
+#### 17. 文生图指令遵循评估 (t2i-instruction_following)
 **描述**：评估文生图模型对 prompt 的遵循程度
 **参数要求**：
 - `query`: 文生图 prompt
@@ -266,7 +251,7 @@ python scripts/evalbot_skill.py model-evaluation --evaluate-type "image_text-log
 python scripts/evalbot_skill.py model-evaluation --evaluate-type "t2i-instruction_following" --params '{"query": "画一只戴蓝色领结的企鹅", "reply": "![image](https://example.com/out.png)", "c_type": "instruction_following"}'
 ```
 
-#### 19. 文生图一致性评估 (t2i-consistency)
+#### 18. 文生图一致性评估 (t2i-consistency)
 **描述**：评估图像编辑前后的一致性（按指令修改 + 保留无关区域）
 **参数要求**：
 - `query`: 编辑指令
@@ -279,7 +264,7 @@ python scripts/evalbot_skill.py model-evaluation --evaluate-type "t2i-instructio
 python scripts/evalbot_skill.py model-evaluation --evaluate-type "t2i-consistency" --params '{"query": "把图里的桌子换成一只白色的狗", "reference_imgs": ["https://example.com/in.png"], "reply_imgs": ["https://example.com/out.png"], "c_type": "consistency"}'
 ```
 
-#### 20. 文生视频指令遵循评估 (t2v-instruction_following)
+#### 19. 文生视频指令遵循评估 (t2v-instruction_following)
 **描述**：评估文生视频模型对 prompt 的遵循程度
 **参数要求**：
 - `query`: 文生视频 prompt
@@ -291,7 +276,7 @@ python scripts/evalbot_skill.py model-evaluation --evaluate-type "t2i-consistenc
 python scripts/evalbot_skill.py model-evaluation --evaluate-type "t2v-instruction_following" --params '{"query": "年轻女孩在公园长椅上看书并微笑说话", "reply_videos": ["https://example.com/video.mp4"], "c_type": "t2v_instruction_following"}'
 ```
 
-#### 21. 视频生视频指令遵循评估 (v2v-instruction_following)
+#### 20. 视频生视频指令遵循评估 (v2v-instruction_following)
 **描述**：评估视频生视频模型对 prompt 的遵循程度
 **参数要求**：
 - `query`: prompt
@@ -303,7 +288,7 @@ python scripts/evalbot_skill.py model-evaluation --evaluate-type "t2v-instructio
 python scripts/evalbot_skill.py model-evaluation --evaluate-type "v2v-instruction_following" --params '{"query": "...", "reply": "...", "c_type": "instruction_following"}'
 ```
 
-#### 22. 图生视频指令遵循评估 (i2v-instruction_following)
+#### 21. 图生视频指令遵循评估 (i2v-instruction_following)
 **描述**：评估图生视频模型对 prompt 的遵循程度
 **参数要求**：
 - `query`: prompt

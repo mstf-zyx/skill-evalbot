@@ -3,9 +3,11 @@ import sys
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
+import pytest
+
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 
-from evalbot.client import EvalbotClient, _strip_prefix  # noqa: E402
+from evalbot.client import EvalbotClient, _from_dict, _strip_prefix, AbilityTriggerRespData  # noqa: E402
 
 
 # ---------------------- _strip_prefix ----------------------
@@ -94,3 +96,53 @@ def test_plugin_trigger_propagates_exception():
             assert "boom" in str(e)
         else:
             raise AssertionError("expected RuntimeError to be raised")
+
+
+# ---------------------- _from_dict 容错（Issue 2） ----------------------
+
+def test_from_dict_drops_unknown_fields():
+    """后端新增字段时不应让客户端崩溃。"""
+    data = {"task_id": 7, "task_status": "done", "future_field_x": 123}
+    obj = _from_dict(AbilityTriggerRespData, data)
+    assert obj.task_id == 7
+    assert obj.task_status == "done"
+    assert not hasattr(obj, "future_field_x")
+
+
+def test_ability_trigger_tolerates_unknown_response_fields():
+    lines = ['data: {"task_id": 9, "task_status": "done", "new_unknown": "x"}']
+    with patch("evalbot.client.requests.post", return_value=_mock_response(lines)):
+        client = EvalbotClient(token="t")
+        result = client.ability_trigger("text-expression", "{}")
+    assert result is not None and result.task_id == 9
+
+
+# ---------------------- token 缺失（Issue 6） ----------------------
+
+def test_missing_token_raises_runtime_error(monkeypatch):
+    monkeypatch.delenv("EVALBOT_TOKEN", raising=False)
+    client = EvalbotClient(token="")
+    with pytest.raises(RuntimeError, match="EVALBOT_TOKEN"):
+        client._get_headers()
+
+
+# ---------------------- HTTP 错误体日志（Issue 4） ----------------------
+
+def test_ability_trigger_logs_error_body_on_400(caplog):
+    resp = MagicMock()
+    resp.__enter__.return_value = resp
+    resp.__exit__.return_value = False
+    resp.ok = False
+    resp.status_code = 400
+    resp.text = '{"base":{"error_msg":"no id found for given id_key","ret":100}}'
+    import requests as _requests
+    resp.raise_for_status.side_effect = _requests.HTTPError("400 Client Error")
+    with patch("evalbot.client.requests.post", return_value=resp):
+        client = EvalbotClient(token="t")
+        with caplog.at_level("ERROR"):
+            try:
+                client.ability_trigger("text-expression", "{}")
+            except _requests.HTTPError:
+                pass
+    # 日志中应包含响应体关键字，方便联调
+    assert any("no id found for given id_key" in rec.message for rec in caplog.records)

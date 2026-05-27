@@ -9,27 +9,10 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 
 from evalbot.schema import (  # noqa: E402
     EVALUATE_SPECS,
+    apply_defaults,
     list_evaluate_types,
-    resolve_evaluate_type,
     validate_params,
 )
-
-
-def test_alias_mapping_for_new_types():
-    assert resolve_evaluate_type("text-prompt_follow") == "prompt_follow"
-    assert resolve_evaluate_type("text-gsb") == "gsb"
-    assert resolve_evaluate_type("knowledge-satisfaction_of_needs") == "satisfaction_of_needs"
-    assert resolve_evaluate_type("t2i-consistency") == "t2i_consistency_check"
-
-
-def test_alias_mapping_for_legacy_types_passthrough():
-    # 老 5 个 knowledge-* 走直传
-    assert resolve_evaluate_type("knowledge-instruction_following") == "knowledge-instruction_following"
-    assert resolve_evaluate_type("knowledge-richness") == "knowledge-richness"
-
-
-def test_alias_mapping_for_unknown_type_passthrough():
-    assert resolve_evaluate_type("non-existent-type") == "non-existent-type"
 
 
 def test_validate_params_passes_when_required_present():
@@ -69,11 +52,65 @@ def test_list_evaluate_types_shape():
     items = list_evaluate_types()
     assert len(items) == len(EVALUATE_SPECS)
     sample = items[0]
-    assert {"evaluate_type", "workflow", "required"} == set(sample.keys())
+    assert {"evaluate_type", "required", "defaults"} == set(sample.keys())
     assert isinstance(sample["required"], list)
+    assert isinstance(sample["defaults"], dict)
 
 
-def test_all_specs_have_non_empty_workflow():
+def test_all_specs_have_required_set():
     for name, spec in EVALUATE_SPECS.items():
-        assert spec.workflow, f"{name} 的 workflow 不能为空"
-        assert isinstance(spec.required, set)
+        assert isinstance(spec.required, set), f"{name} 的 required 必须是 set"
+        assert spec.required, f"{name} 至少应有一个必填字段"
+
+
+# ---------------------- apply_defaults ----------------------
+
+def test_apply_defaults_fills_c_type_for_t2i():
+    """t2i-instruction_following 的 c_type 默认值由 schema 提供，调用方可不传。"""
+    merged = apply_defaults(
+        "t2i-instruction_following",
+        {"query": "q", "reply": "r"},
+    )
+    assert merged["c_type"] == "instruction_following"
+    # 此时校验应通过
+    validate_params("t2i-instruction_following", merged)
+
+
+def test_apply_defaults_user_value_wins():
+    """用户传入的值优先于 schema 默认值。"""
+    merged = apply_defaults(
+        "t2i-instruction_following",
+        {"query": "q", "reply": "r", "c_type": "custom_type"},
+    )
+    assert merged["c_type"] == "custom_type"
+
+
+def test_apply_defaults_no_op_when_no_defaults():
+    """无默认值的指标返回新 dict，不修改入参。"""
+    src = {"query": "q", "reply": "r"}
+    merged = apply_defaults("text-expression", src)
+    assert merged == src
+    assert merged is not src  # 必须是新 dict
+
+
+def test_apply_defaults_unknown_type_passthrough():
+    src = {"foo": "bar"}
+    merged = apply_defaults("non-existent", src)
+    assert merged == src
+
+
+def test_list_evaluate_types_includes_defaults_field():
+    items = list_evaluate_types()
+    by_name = {it["evaluate_type"]: it for it in items}
+    assert by_name["t2i-instruction_following"]["defaults"] == {
+        "c_type": "instruction_following"
+    }
+    assert by_name["text-expression"]["defaults"] == {}
+
+
+def test_all_multimodal_specs_have_c_type_default():
+    """所有需要 c_type 的指标都应在 schema 中给出默认值，避免用户记忆。"""
+    for name, spec in EVALUATE_SPECS.items():
+        if "c_type" in spec.required:
+            assert "c_type" in spec.defaults, f"{name} 缺少 c_type 默认值"
+

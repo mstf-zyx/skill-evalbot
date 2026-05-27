@@ -72,7 +72,15 @@ def main() -> None:
 
     if args.command == "model-evaluation":
         params = json.loads(args.params)
-        result = skill.model_evaluation(args.evaluate_type, params)
+        try:
+            result = skill.model_evaluation(args.evaluate_type, params)
+        except ValueError as e:
+            # 必填参数缺失等参数级错误：给独立退出码，方便脚本编排区分
+            print(json.dumps({"error": str(e)}, ensure_ascii=False))
+            sys.exit(3)
+        except RuntimeError as e:
+            print(json.dumps({"error": str(e)}, ensure_ascii=False))
+            sys.exit(2)
         if result is None:
             print(json.dumps({"error": "Evaluation returned no data"}, ensure_ascii=False))
             sys.exit(1)

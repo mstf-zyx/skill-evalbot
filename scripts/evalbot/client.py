@@ -1,9 +1,10 @@
 """Evalbot HTTP 客户端。"""
+import dataclasses
 import json
 import logging
 import os
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Type
 
 import requests
 
@@ -45,6 +46,24 @@ def _strip_prefix(line: str, prefix: str) -> str:
     return line[len(prefix):] if line.startswith(prefix) else line
 
 
+def _from_dict(cls: Type[Any], data: Dict[str, Any]) -> Any:
+    """容忍后端新增字段：把 dict 反序列化为 dataclass 时丢弃未知键。"""
+    known = {f.name for f in dataclasses.fields(cls)}
+    extra = set(data.keys()) - known
+    if extra:
+        logger.debug("Ignoring unknown response fields: %s", sorted(extra))
+    return cls(**{k: v for k, v in data.items() if k in known})
+
+
+def _log_http_error(resp: requests.Response, op: str) -> None:
+    """统一记录后端 4xx/5xx 响应体，方便联调定位问题。"""
+    try:
+        body = resp.text[:500]
+    except Exception:  # noqa: BLE001
+        body = "<unreadable>"
+    logger.error("%s failed: status=%s body=%s", op, resp.status_code, body)
+
+
 class EvalbotClient:
     """Evalbot HTTP API 客户端。"""
 
@@ -55,10 +74,14 @@ class EvalbotClient:
         self.timeout = timeout
 
     def _get_headers(self) -> Dict[str, str]:
-        headers = {"Content-Type": "application/json"}
-        if self.token:
-            headers["Authorization"] = f"Bearer {self.token}"
-        return headers
+        if not self.token:
+            raise RuntimeError(
+                "缺少 EVALBOT_TOKEN：请设置环境变量或通过 --token 显式传入。"
+            )
+        return {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {self.token}",
+        }
 
     def ability_trigger(self, evaluate_type: str, params: str) -> Optional[AbilityTriggerRespData]:
         """能力评估触发（流式响应，POST /evaluate/ability/trigger）。
@@ -83,14 +106,16 @@ class EvalbotClient:
                 url, json=payload, headers=self._get_headers(),
                 stream=True, timeout=self.timeout,
             ) as resp:
-                resp.raise_for_status()
+                if not resp.ok:
+                    _log_http_error(resp, "ability_trigger")
+                    resp.raise_for_status()
                 for line in resp.iter_lines(decode_unicode=True):
                     if not line or not line.startswith("data:"):
                         continue
                     raw = _strip_prefix(line, "data:").lstrip()
                     data = json.loads(raw)
                     logger.info("Ability trigger success")
-                    return AbilityTriggerRespData(**data)
+                    return _from_dict(AbilityTriggerRespData, data)
             return None
         except Exception:
             logger.exception("Exception in ability_trigger")
@@ -125,19 +150,21 @@ class EvalbotClient:
                 url, json=payload, headers=self._get_headers(),
                 stream=True, timeout=self.timeout,
             ) as resp:
-                resp.raise_for_status()
+                if not resp.ok:
+                    _log_http_error(resp, "plugin_trigger")
+                    resp.raise_for_status()
                 for line in resp.iter_lines(decode_unicode=True):
                     if not line:
                         continue
                     # 新事件起始：严格按 SSE 字段名前缀判定，避免误匹配 data 中含 "id" 字符。
                     if line.startswith("id:") and tmp:
-                        results.append(PluginTriggerData(**tmp))
+                        results.append(_from_dict(PluginTriggerData, tmp))
                         tmp = {}
                     key, sep, value = line.partition(": ")
                     if sep:
                         tmp[key] = value
                 if tmp:
-                    results.append(PluginTriggerData(**tmp))
+                    results.append(_from_dict(PluginTriggerData, tmp))
             logger.info("Plugin trigger success: events=%d", len(results))
             return results
         except Exception:

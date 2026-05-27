@@ -1,5 +1,19 @@
 # 版本变更日志
 
+## v1.2.1 (2026-05-27)
+- **评估能力对齐**：`evaluate_type` 改为直接透传给后端，与 SKILL.md / README 列出的名称完全一致；解决 `text-*`、`image-*`、`t2i/t2v/v2v/i2v-*` 等指标返回 `400 no id found for given id_key` 的问题
+- **指标精简**：下线 `image_text-logicality`（图文逻辑性评估，后端 workflow `image_text_logicality` 已下线），从 `EVALUATE_SPECS` 注册表、SKILL.md 类型一览、`references/README.md` 详细参数文档中一并移除；评估指标总数 22 → 21
+- **健壮性**：`AbilityTriggerRespData` / `PluginTriggerData` 反序列化容忍后端新增字段（新增 `_from_dict` 帮助函数自动丢弃未知键），避免后端字段扩展时客户端 `TypeError` 崩溃
+- **可观测性**：HTTP 4xx/5xx 失败时在日志中打印响应体（前 500 字节），联调时无需另写脚本即可看到 `error_msg` 等关键信息
+- **易用性**：
+  - `EvalbotClient` 在 token 缺失时抛 `RuntimeError("缺少 EVALBOT_TOKEN…")`，CLI 捕获后退出码 2，避免发出无效的 401 请求
+  - CLI 单独捕获 `ValueError`（必填参数缺失）并以退出码 3 返回，便于脚本编排区分错误类型
+  - `EvaluateSpec` 新增 `defaults` 字段，多模态指标（`t2i-*` / `t2v-*` / `v2v-*` / `i2v-*`）的 `c_type` 由 schema 提供推荐默认值，调用方可不传；用户传入值优先生效
+  - 新增 `apply_defaults(...)` API，`list-types` JSON 输出包含 `defaults` 字段（移除 `workflow` 字段）
+- **文档**：修复 `references/README.md` 多模态章节序号错乱（原有重复的 #21 与缺失的 #18），现 17-21 连续编号
+- **构建**：`scripts/pack.sh` 打包前自动跑 `pytest tests/`，全过才打包，并校验 zip 文件名与 SKILL.md 中 `name+version` 一致；可用 `SKIP_TESTS=1` 跳过
+- **测试**：补充 12 个用例覆盖 `_from_dict` 容错、HTTP 错误体日志、token 缺失、`apply_defaults` 行为、`_wrap_params` JSON 序列化等关键路径，单测从 16 → 28
+
 ## v1.2.0 (2026-05-21)
 - 评估能力扩展：从 5 个指标扩展到 22 个，覆盖文本类（`text-*` 7 个）、知识类（`knowledge-*` 6 个）、图像类（`image-*` 3 个）、图文混合类（`image_text-*` 1 个）和多模态生成类（`t2i-*` / `t2v-*` / `v2v-*` / `i2v-*` 5 个）
 - 新增对外评估类型 → 后端 workflow 名的 alias 映射机制（`scripts/evalbot/schema.py` 中 `EVALUATE_SPECS` 单一注册表），新增/重命名指标只需改一处；老 5 个 `knowledge-*` 指标保持直传，向后兼容
