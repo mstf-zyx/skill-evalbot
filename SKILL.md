@@ -4,7 +4,7 @@ description: 通过 Evalbot API 评测大模型回复质量并生成评测用数
 license: MIT
 metadata:
   author: bytedance-evalbot
-  version: "1.2.1"
+  version: "1.2.2"
   homepage: "https://evalbot.bytedance.com"
   tags: ["data-generation", "model-evaluation", "evalbot"]
 compatibility: "需要Python 3.8+ 和 Evalbot API访问权限，支持所有AgentSkills兼容平台"
@@ -25,7 +25,7 @@ compatibility: "需要Python 3.8+ 和 Evalbot API访问权限，支持所有Agen
 3. 配置环境变量：
    ```bash
    cp .env.example .env
-   # 编辑.env文件，填入你的Evalbot Token
+   # 编辑 .env，填入 EVALBOT_TOKEN（获取方式见 references/README.md）
    ```
 
 ### 数据生成

@@ -23,6 +23,19 @@ pip install -r requirements.txt
 export EVALBOT_TOKEN="your_token"  # Evalbot 授权 Token
 ```
 
+#### 获取 Evalbot Token
+
+登录 [https://evalbot.bytedance.com](https://evalbot.bytedance.com)，按下图步骤创建并复制 Token：
+
+![获取 Evalbot Token](../assets/get-token.gif)
+
+若动图无法加载，可按以下文字步骤操作：
+
+1. 浏览器打开 [https://evalbot.bytedance.com](https://evalbot.bytedance.com) 并完成登录。
+2. 点击右上角头像进入个人设置页面，点击左侧「Token生成」。
+3. 点击「生成新Token」创建一个新的 Token 并复制。
+4. 填入本地 `.env` 文件的 `EVALBOT_TOKEN` 字段。
+
 ### 命令行使用
 
 **数据生成:**
