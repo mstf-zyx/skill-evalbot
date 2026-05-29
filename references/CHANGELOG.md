@@ -1,5 +1,8 @@
 # 版本变更日志
 
+## v1.2.3 (2026-05-29)
+- **指标精简**：下线 `knowledge-instruction_following`（知识类指令遵循评估，后端能力已下线），从 `EVALUATE_SPECS` 注册表、SKILL.md 类型一览与快速开始示例、`references/README.md` 详细参数文档中一并移除；知识类详细章节剩余指标连续重编号 1-5，整体编号 1-20，评估指标总数 21 → 20
+
 ## v1.2.2 (2026-05-28)
 - **文档**：`references/README.md` 新增「获取 Evalbot Token」小节，含演示动图（`assets/get-token.gif`）与文字兜底步骤；`SKILL.md` 简化环境变量注释，引导到 README 查看 Token 获取方式
 

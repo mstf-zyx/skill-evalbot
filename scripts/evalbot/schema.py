@@ -17,7 +17,6 @@ class EvaluateSpec(NamedTuple):
 # 单一注册表。键即对外 evaluate_type，也就是后端 ``/evaluate/ability/trigger`` 接收的字符串。
 EVALUATE_SPECS: Dict[str, EvaluateSpec] = {
     # 知识类
-    "knowledge-instruction_following": EvaluateSpec({"location", "scene", "query", "reply"}),
     "knowledge-scalable-comprehensive_key_points": EvaluateSpec({"scene", "query", "reply"}),
     "knowledge-authentic_and_accurate-general": EvaluateSpec({"base_time", "query", "reply"}),
     "knowledge-richness": EvaluateSpec({"query", "reply"}),
