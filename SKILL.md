@@ -4,7 +4,7 @@ description: 通过 Evalbot API 评测大模型回复质量并生成评测用数
 license: MIT
 metadata:
   author: bytedance-evalbot
-  version: "1.2.2"
+  version: "1.2.3"
   homepage: "https://evalbot.bytedance.com"
   tags: ["data-generation", "model-evaluation", "evalbot"]
 compatibility: "需要Python 3.8+ 和 Evalbot API访问权限，支持所有AgentSkills兼容平台"
@@ -36,8 +36,8 @@ python scripts/evalbot_skill.py data-generation --generate-type hot_topic --top-
 ### 模型评估
 ```bash
 python scripts/evalbot_skill.py model-evaluation \
-  --evaluate-type knowledge-instruction_following \
-  --params '{"location": "上海", "scene": "聊天", "query": "你的问题", "reply": "模型回复"}'
+  --evaluate-type knowledge-scalable-comprehensive_key_points \
+  --params '{"scene": "聊天", "query": "你的问题", "reply": "模型回复"}'
 ```
 
 ## 命令详情
@@ -71,7 +71,6 @@ python scripts/evalbot_skill.py model-evaluation \
 ##### 知识类（knowledge-*）
 | 评估类型 | 说明 |
 |----------|------|
-| knowledge-instruction_following | 指令遵循评估（基于地点与场景） |
 | knowledge-scalable-comprehensive_key_points | 可扩展-要点完整评估 |
 | knowledge-authentic_and_accurate-general | 真实准确性评估（基于基准时间） |
 | knowledge-richness | 丰富度评估 |
